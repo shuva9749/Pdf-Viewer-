@@ -1,167 +1,104 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Drive Picker</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Super Advance PDF Viewer - View PDF files from Google Drive, OneDrive, Dropbox, and your device. SEO optimized and AdSense ready." />
+  <title>Super Advance PDF Viewer</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #f0f4ff, #d2e3fc);
-      margin: 0;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-    }
-    h1 {
-      color: #1a73e8;
-    }
-    .button-group button {
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      padding: 0.8rem 1.5rem;
-      margin: 0.5rem;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.3s;
-    }
-    .button-group button:hover {
-      background-color: #0c5dc0;
-    }
-    #content {
-      background-color: #ffffff;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      margin-top: 1rem;
-      max-width: 800px;
-      width: 100%;
-      white-space: pre-wrap;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background-color: #f3f4f6; }
+    .pdf-container canvas { width: 100% !important; height: auto !important; }
   </style>
 </head>
-<body>
-  <h1>Google Drive File Picker</h1>
-  <div class="button-group">
-    <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
-    <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
-  </div>
-  <div id="content"></div>  <script>
-    const CLIENT_ID = '705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com';
-    const API_KEY = 'AIzaSyAs1-yX51Kd5aKl-mB1oHhKXhOwCUDcPUY';
-    const APP_ID = '705204588232';
-    const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+<body class="p-4">
+  <header class="text-center py-4">
+    <h1 class="text-4xl font-bold text-blue-700">Super Advance PDF Viewer</h1>
+    <p class="text-gray-600">View your PDF files easily from any source</p>
+  </header>  <!-- AdSense Top Ad Slot -->  <div class="my-4 text-center">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+         data-ad-slot="top-slot"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>  <!-- File Source Buttons -->  <div class="flex flex-wrap justify-center gap-4 mb-6">
+    <input type="file" id="fileInput" accept="application/pdf" class="hidden">
+    <button onclick="document.getElementById('fileInput').click()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">My Device</button>
+    <button id="googleDriveBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Google Drive</button>
+    <button onclick="alert('OneDrive integration coming soon')" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded">OneDrive</button>
+    <button onclick="alert('Dropbox integration coming soon')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">Dropbox</button>
+  </div>  <!-- PDF Viewer -->  <div id="pdfViewer" class="pdf-container max-w-4xl mx-auto bg-white p-4 rounded shadow"></div>  <!-- AdSense Bottom Ad Slot -->  <div class="my-4 text-center">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+         data-ad-slot="bottom-slot"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>  <!-- PDF Rendering Script -->  <script>
+    const viewer = document.getElementById('pdfViewer');
 
-    let tokenClient;
-    let accessToken = null;
-    let pickerInited = false;
-    let gisInited = false;
-
-    document.getElementById('authorize_button').style.visibility = 'hidden';
-    document.getElementById('signout_button').style.visibility = 'hidden';
-
-    function gapiLoaded() {
-      gapi.load('client:picker', initializePicker);
-    }
-
-    async function initializePicker() {
-      await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
-      pickerInited = true;
-      maybeEnableButtons();
-    }
-
-    function gisLoaded() {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: ''
+    function renderPDF(url) {
+      pdfjsLib.getDocument(url).promise.then(pdf => {
+        viewer.innerHTML = '';
+        for (let page = 1; page <= pdf.numPages; page++) {
+          pdf.getPage(page).then(p => {
+            const canvas = document.createElement('canvas');
+            viewer.appendChild(canvas);
+            const context = canvas.getContext('2d');
+            const viewport = p.getViewport({ scale: 1.5 });
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            p.render({ canvasContext: context, viewport: viewport });
+          });
+        }
       });
-      gisInited = true;
-      maybeEnableButtons();
     }
 
-    function maybeEnableButtons() {
-      if (pickerInited && gisInited) {
-        document.getElementById('authorize_button').style.visibility = 'visible';
+    document.getElementById('fileInput').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        const fileURL = URL.createObjectURL(file);
+        renderPDF(fileURL);
       }
-    }
+    });
+  </script>  <!-- Google Picker Integration -->  <script src="https://apis.google.com/js/api.js"></script>  <script>
+    let oauthToken;
 
-    function handleAuthClick() {
-      tokenClient.callback = async (response) => {
-        if (response.error !== undefined) throw response;
-        accessToken = response.access_token;
-        document.getElementById('signout_button').style.visibility = 'visible';
-        document.getElementById('authorize_button').innerText = 'Refresh';
-        await createPicker();
-      };
-
-      if (!accessToken) {
-        tokenClient.requestAccessToken({prompt: 'consent'});
-      } else {
-        tokenClient.requestAccessToken({prompt: ''});
-      }
-    }
-
-    function handleSignoutClick() {
-      if (accessToken) {
-        google.accounts.oauth2.revoke(accessToken);
-        accessToken = null;
-        document.getElementById('content').innerText = '';
-        document.getElementById('authorize_button').innerText = 'Authorize';
-        document.getElementById('signout_button').style.visibility = 'hidden';
-      }
+    function loadPickerScript() {
+      gapi.load('client:auth2', () => {
+        gapi.auth2.init({
+          client_id: '705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com',
+        }).then(() => {
+          gapi.load('picker', {'callback': createPicker});
+        });
+      });
     }
 
     function createPicker() {
-      const view = new google.picker.View(google.picker.ViewId.DOCS);
-      view.setMimeTypes('application/pdf,image/png,image/jpeg');
-
-      const picker = new google.picker.PickerBuilder()
-        .enableFeature(google.picker.Feature.NAV_HIDDEN)
-        .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-        .setDeveloperKey(API_KEY)
-        .setAppId(APP_ID)
-        .setOAuthToken(accessToken)
-        .addView(view)
-        .addView(new google.picker.DocsUploadView())
-        .setCallback(pickerCallback)
-        .build();
-
-      picker.setVisible(true);
+      const GoogleAuth = gapi.auth2.getAuthInstance();
+      GoogleAuth.signIn().then(googleUser => {
+        oauthToken = googleUser.getAuthResponse().access_token;
+        const picker = new google.picker.PickerBuilder()
+          .addView(google.picker.ViewId.DOCS)
+          .setOAuthToken(oauthToken)
+          .setDeveloperKey('AIzaSyAs1-yX51Kd5aKl-mB1oHhKXhOwCUDcPUY')
+          .setCallback(pickerCallback)
+          .build();
+        picker.setVisible(true);
+      });
     }
 
-    async function pickerCallback(data) {
+    function pickerCallback(data) {
       if (data.action === google.picker.Action.PICKED) {
-        const contentDiv = document.getElementById('content');
-        contentDiv.innerHTML = `<strong>Selected Files:</strong><br/>`;
-
-        for (const doc of data.docs) {
-          const fileId = doc.id;
-          const fileName = doc.name;
-
-          const fileDetails = document.createElement('p');
-          fileDetails.innerHTML = `<strong>${fileName}</strong><br>File ID: ${fileId}`;
-          contentDiv.appendChild(fileDetails);
-
-          try {
-            const res = await gapi.client.drive.files.get({
-              fileId,
-              fields: '*'
-            });
-            const detail = document.createElement('pre');
-            detail.textContent = JSON.stringify(res.result, null, 2);
-            contentDiv.appendChild(detail);
-          } catch (e) {
-            const error = document.createElement('p');
-            error.style.color = 'red';
-            error.textContent = 'Error loading file details';
-            contentDiv.appendChild(error);
-          }
-        }
+        const fileId = data.docs[0].id;
+        const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=AIzaSyAs1-yX51Kd5aKl-mB1oHhKXhOwCUDcPUY`;
+        renderPDF(url);
       }
     }
-  </script>  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script></body>
-</html>
+
+    document.getElementById('googleDriveBtn').addEventListener('click', loadPickerScript);
+  </script></body>
+  </html>
