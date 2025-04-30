@@ -1,0 +1,119 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Super Advance PDF Viewer - View PDF files from Google Drive, OneDrive, Dropbox, and your device. SEO optimized and AdSense ready." />
+  <title>Super Advance PDF Viewer</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background-color: #f3f4f6; }
+    .pdf-container canvas { width: 100% !important; height: auto !important; }
+  </style>
+</head>
+<body class="p-4">
+  <!-- Header -->
+  <header class="text-center py-4">
+    <h1 class="text-4xl font-bold text-blue-700">Super Advance PDF Viewer</h1>
+    <p class="text-gray-600">View your PDF files easily from any source</p>
+  </header>  <!-- AdSense Top Ad Slot -->  <div class="my-4 text-center">
+    <!-- Replace with your AdSense Ad Unit -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+         data-ad-slot="top-slot"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>  <!-- PDF Source Buttons -->  <div class="flex flex-wrap justify-center gap-4 mb-6">
+    <input type="file" id="fileInput" accept="application/pdf" class="hidden">
+    <button onclick="document.getElementById('fileInput').click()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">My Device</button>
+    <button onclick="openGooglePicker()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Google Drive</button>
+    <button onclick="openOneDrivePicker()" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded">OneDrive</button>
+    <button onclick="openDropboxChooser()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded">Dropbox</button>
+  </div>  <!-- PDF Viewer Area -->  <div id="pdfViewer" class="pdf-container max-w-4xl mx-auto bg-white p-4 rounded shadow"></div>  <!-- AdSense Bottom Ad Slot -->  <div class="my-4 text-center">
+    <!-- Replace with your AdSense Ad Unit -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+         data-ad-slot="bottom-slot"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>  <!-- Scripts -->  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>  <script>
+    const viewer = document.getElementById('pdfViewer');
+    
+    function renderPDF(url) {
+      pdfjsLib.getDocument(url).promise.then(pdf => {
+        viewer.innerHTML = ''; // Clear existing content
+        for (let page = 1; page <= pdf.numPages; page++) {
+          pdf.getPage(page).then(p => {
+            const canvas = document.createElement('canvas');
+            viewer.appendChild(canvas);
+            const context = canvas.getContext('2d');
+            const viewport = p.getViewport({ scale: 1.5 });
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            p.render({ canvasContext: context, viewport: viewport });
+          });
+        }
+      });
+    }
+
+    document.getElementById('fileInput').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        const fileURL = URL.createObjectURL(file);
+        renderPDF(fileURL);
+      }
+    });
+
+    // Google Picker API
+    function openGooglePicker() {
+      gapi.load('auth', {'callback': onAuthApiLoad});
+      gapi.load('picker', {'callback': onPickerApiLoad});
+    }
+
+    let oauthToken;
+    function onAuthApiLoad() {
+      window.gapi.auth.authorize({
+        client_id: '705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com',
+        scope: ['https://www.googleapis.com/auth/drive.readonly'],
+        immediate: false
+      }, function(authResult) {
+        if (authResult && !authResult.error) {
+          oauthToken = authResult.access_token;
+        }
+      });
+    }
+
+    function onPickerApiLoad() {
+      if (oauthToken) {
+        const picker = new google.picker.PickerBuilder()
+          .addView(google.picker.ViewId.DOCS)
+          .setOAuthToken(oauthToken)
+          .setDeveloperKey('AIzaSyAs1-yX51Kd5aKl-mB1oHhKXhOwCUDcPUY')
+          .setCallback(pickerCallback)
+          .build();
+        picker.setVisible(true);
+      }
+    }
+
+    function pickerCallback(data) {
+      if (data.action === google.picker.Action.PICKED) {
+        const fileId = data.docs[0].id;
+        const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=AIzaSyAs1-yX51Kd5aKl-mB1oHhKXhOwCUDcPUY`;
+        renderPDF(url);
+      }
+    }
+
+    // Placeholder OneDrive & Dropbox integrations
+    function openOneDrivePicker() {
+      alert('OneDrive Picker integration pending.');
+    }
+
+    function openDropboxChooser() {
+      alert('Dropbox integration pending.');
+    }
+  </script>  <script type="text/javascript" src="https://apis.google.com/js/api.js"></script>  <script type="text/javascript" src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>  <script type="text/javascript" src="https://apis.google.com/js/api.js"></script>  <script type="text/javascript" src="https://apis.google.com/js/client.js"></script>  <script type="text/javascript" src="https://apis.google.com/js/platform.js"></script></body>
+</html>
