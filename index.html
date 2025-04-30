@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,30 +13,49 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
     }
+
     h1 {
       color: #1a73e8;
+      margin-bottom: 1rem;
     }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
     .button-group button {
       background-color: #1a73e8;
       color: white;
       border: none;
       padding: 0.8rem 1.5rem;
-      margin: 0.5rem;
-      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 1rem;
-      transition: background 0.3s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: background 0.3s, transform 0.2s;
     }
+
     .button-group button:hover {
       background-color: #0c5dc0;
+      transform: scale(1.03);
     }
+
+    .button-group img {
+      height: 20px;
+      vertical-align: middle;
+    }
+
     #content {
       background-color: #ffffff;
       padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       margin-top: 1rem;
       max-width: 800px;
       width: 100%;
@@ -46,10 +66,15 @@
 <body>
   <h1>Google Drive File Picker</h1>
   <div class="button-group">
-    <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+    <button id="authorize_button" onclick="handleAuthClick()">
+      <img src="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png" alt="Drive Icon">
+      Google Drive
+    </button>
     <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
   </div>
-  <div id="content"></div>  <script>
+  <div id="content"></div>
+
+  <script>
     const CLIENT_ID = '705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com';
     const API_KEY = 'AIzaSyAs1-yX51Kd5aKl-mB1oHhKXhOwCUDcPUY';
     const APP_ID = '705204588232';
@@ -94,14 +119,14 @@
         if (response.error !== undefined) throw response;
         accessToken = response.access_token;
         document.getElementById('signout_button').style.visibility = 'visible';
-        document.getElementById('authorize_button').innerText = 'Refresh';
+        document.getElementById('authorize_button').innerText = 'Google Drive';
         await createPicker();
       };
 
       if (!accessToken) {
-        tokenClient.requestAccessToken({prompt: 'consent'});
+        tokenClient.requestAccessToken({ prompt: 'consent' });
       } else {
-        tokenClient.requestAccessToken({prompt: ''});
+        tokenClient.requestAccessToken({ prompt: '' });
       }
     }
 
@@ -110,7 +135,7 @@
         google.accounts.oauth2.revoke(accessToken);
         accessToken = null;
         document.getElementById('content').innerText = '';
-        document.getElementById('authorize_button').innerText = 'Authorize';
+        document.getElementById('authorize_button').innerText = 'Google Drive';
         document.getElementById('signout_button').style.visibility = 'hidden';
       }
     }
@@ -163,5 +188,9 @@
         }
       }
     }
-  </script>  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script></body>
+  </script>
+
+  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</body>
 </html>
