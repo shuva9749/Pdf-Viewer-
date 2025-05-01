@@ -1,154 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>File Picker</title>
+  <meta charset="UTF-8">
+  <title>Dropbox File Upload</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f5f8ff; }
-    button, label {
-      margin: 10px;
-      padding: 10px 20px;
-      background: #1a73e8;
+    /* ===== Dropbox ফাইল আপলোডের CSS সেকশন ===== */
+    #dropbox-button {
+      background-color: #0061ff;
       color: white;
+      padding: 12px 20px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      font-size: 16px;
     }
-    label { cursor: pointer; }
-    #content { margin-top: 20px; white-space: pre-wrap; }
+
+    #dropbox-button:hover {
+      background-color: #004edc;
+    }
+
+    #dropbox-filename {
+      margin-top: 15px;
+      font-family: sans-serif;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
-  <h2>Choose a file</h2>
 
-  <!-- Google Drive -->
-  <button onclick="handleAuthClick()">Google Drive</button>
+  <!-- ===== Dropbox ফাইল আপলোডের HTML সেকশন ===== -->
+  <h2>Dropbox থেকে ফাইল নির্বাচন করুন</h2>
+  <button id="dropbox-button">Dropbox থেকে ফাইল নির্বাচন করুন</button>
+  <div id="dropbox-filename"></div>
 
-  <!-- Dropbox -->
-  <button id="dropbox-button">Dropbox</button>
+  <!-- Dropbox Chooser JS SDK লোড -->
+  <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="317alyycs84fbvu"></script>
 
-  <!-- Local File -->
-  <label for="fileInput">My Device</label>
-  <input type="file" id="fileInput" style="display:none;" onchange="handleLocal(event)">
-
-  <div id="content"></div>
-
-  <!-- PDF.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-  <!-- Google Picker + Auth -->
   <script>
-    const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
-    const API_KEY = 'YOUR_GOOGLE_API_KEY';
-    const APP_ID = 'YOUR_GOOGLE_APP_ID';
-    const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+    // ===== Dropbox ফাইল আপলোডের JavaScript সেকশন =====
 
-    let tokenClient, accessToken;
-
-    function gapiLoaded() {
-      gapi.load('client:picker', async () => {
-        await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
-        tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: CLIENT_ID,
-          scope: SCOPES,
-          callback: async (response) => {
-            if (response.error) return;
-            accessToken = response.access_token;
-            openPicker();
-          }
-        });
-      });
-    }
-
-    function handleAuthClick() {
-      if (!accessToken) {
-        tokenClient.requestAccessToken({ prompt: 'consent' });
-      } else {
-        openPicker();
-      }
-    }
-
-    function openPicker() {
-      const view = new google.picker.View(google.picker.ViewId.DOCS);
-      view.setMimeTypes('application/pdf');
-
-      const picker = new google.picker.PickerBuilder()
-        .addView(view)
-        .addView(new google.picker.DocsUploadView())
-        .setOAuthToken(accessToken)
-        .setDeveloperKey(API_KEY)
-        .setAppId(APP_ID)
-        .setCallback(pickerCallback)
-        .build();
-
-      picker.setVisible(true);
-    }
-
-    async function pickerCallback(data) {
-      if (data.action === google.picker.Action.PICKED) {
-        const fileId = data.docs[0].id;
-        const file = await gapi.client.drive.files.get({
-          fileId: fileId,
-          alt: 'media'
-        });
-        displayPDF(file.body);
-      }
-    }
-  </script>
-
-  <!-- Dropbox Script -->
-  <script src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="YOUR_DROPBOX_APP_KEY"></script>
-  <script>
-    document.getElementById('dropbox-button').addEventListener('click', () => {
+    document.getElementById('dropbox-button').addEventListener('click', function () {
       Dropbox.choose({
-        success: function(files) {
-          fetch(files[0].link)
-            .then(res => res.arrayBuffer())
-            .then(data => displayPDF(data));
-        },
-        linkType: "direct",
         multiselect: false,
-        extensions: ['.pdf']
+        extensions: ['.pdf', '.docx', '.txt'],
+        success: function(files) {
+          const file = files[0];
+          document.getElementById('dropbox-filename').innerText =
+            'আপনি নির্বাচিত করেছেন: ' + file.name + '\nURL: ' + file.link;
+
+          console.log("ড্রপবক্স ফাইল URL:", file.link);
+        },
+        cancel: function() {
+          alert("আপনি কোনো ফাইল সিলেক্ট করেননি।");
+        }
       });
     });
   </script>
 
-  <!-- File Reader -->
-  <script>
-    function handleLocal(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function () {
-        displayPDF(reader.result);
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function displayPDF(arrayBuffer) {
-      const contentDiv = document.getElementById('content');
-      contentDiv.innerHTML = '';
-      const typedarray = new Uint8Array(arrayBuffer);
-
-      pdfjsLib.getDocument({ data: typedarray }).promise.then(pdf => {
-        for (let i = 1; i <= pdf.numPages; i++) {
-          pdf.getPage(i).then(page => {
-            const scale = 1.2;
-            const viewport = page.getViewport({ scale });
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-            contentDiv.appendChild(canvas);
-            page.render({ canvasContext: ctx, viewport: viewport });
-          });
-        }
-      });
-    }
-  </script>
-
-  <!-- Load Google APIs -->
-  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-  <script async defer src="https://accounts.google.com/gsi/client"></script>
 </body>
 </html>
