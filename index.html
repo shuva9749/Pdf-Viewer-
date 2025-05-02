@@ -1,67 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Dropbox File Viewer</title>
+  <meta charset="UTF-8">
+  <title>Dropbox File Picker</title>
   <style>
-    /* === Dropbox Section CSS === */
+    /* ===== CSS: Dropbox button styling ===== */
     #dropbox-button {
-      background-color: #007EE5;
-      color: white;
       padding: 10px 20px;
+      background-color: #007ee5;
+      color: white;
       border: none;
+      border-radius: 5px;
       font-size: 16px;
       cursor: pointer;
-      border-radius: 5px;
+    }
+    #dropbox-button:hover {
+      background-color: #005bb5;
     }
 
-    #dropbox-preview {
+    #output {
       margin-top: 20px;
-      border: 1px solid #ccc;
-      padding: 10px;
-    }
-
-    iframe {
-      width: 100%;
-      height: 600px;
-      border: none;
+      font-family: Arial;
     }
   </style>
+  <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="317alyycs84fbvu"></script>
 </head>
 <body>
 
-  <!-- === Dropbox Section HTML === -->
-  <h2>Select a file from Dropbox</h2>
-  <button id="dropbox-button">Choose from Dropbox</button>
+  <!-- ===== HTML: Dropbox Button ===== -->
+  <button id="dropbox-button">Pick a file from Dropbox</button>
 
-  <!-- Display selected file preview -->
-  <div id="dropbox-preview"></div>
+  <!-- ===== HTML: Output area ===== -->
+  <div id="output"></div>
 
-  <!-- === Dropbox JavaScript SDK and Logic === -->
-  <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="317alyycs84fbvu"></script>
-
+  <!-- ===== JavaScript: Dropbox integration ===== -->
   <script>
-    // === Dropbox Chooser Integration ===
-    document.getElementById("dropbox-button").onclick = function () {
+    document.getElementById("dropbox-button").addEventListener("click", function () {
       Dropbox.choose({
         success: function (files) {
-          const fileLink = files[0].link;
-          const previewArea = document.getElementById("dropbox-preview");
-
-          // Determine if file is PDF or not
-          if (fileLink.endsWith(".pdf")) {
-            previewArea.innerHTML = '<iframe src="' + fileLink.replace("?dl=0", "?raw=1") + '"></iframe>';
-          } else {
-            previewArea.innerHTML = '<p>File selected: <a href="' + fileLink + '" target="_blank">' + files[0].name + '</a></p>';
-          }
+          const file = files[0];
+          document.getElementById("output").innerHTML =
+            `<strong>File Name:</strong> ${file.name}<br>
+             <strong>Link:</strong> <a href="${file.link}" target="_blank">${file.link}</a>`;
         },
         cancel: function () {
-          alert("No file selected.");
+          alert("File selection cancelled.");
         },
-        linkType: "preview", // Use "direct" for raw links
-        multiselect: false,
-        extensions: ['.pdf', '.jpg', '.png', '.docx']
+        linkType: "preview", // or "direct"
+        multiselect: false,  // set to true if you want to allow multiple file selection
+        extensions: ['.pdf', '.docx', '.jpg', '.png'] // allowed file types
       });
-    };
+    });
   </script>
 
 </body>
