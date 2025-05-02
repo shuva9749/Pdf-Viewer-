@@ -1,57 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Dropbox File Picker</title>
-  <style>
-    /* ===== CSS: Dropbox button styling ===== */
-    #dropbox-button {
-      padding: 10px 20px;
-      background-color: #007ee5;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    #dropbox-button:hover {
-      background-color: #005bb5;
-    }
-
-    #output {
-      margin-top: 20px;
-      font-family: Arial;
-    }
-  </style>
-  <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="317alyycs84fbvu"></script>
+  <title>Google Drive Picker</title>
+  <meta name="google-signin-client_id" content="705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com">
+  <script type="text/javascript" src="https://apis.google.com/js/api.js"></script>
 </head>
 <body>
 
-  <!-- ===== HTML: Dropbox Button ===== -->
-  <button id="dropbox-button">Pick a file from Dropbox</button>
+<!-- Google Drive Picker Button -->
+<button onclick="onApiLoad()">Pick a PDF from Google Drive</button>
 
-  <!-- ===== HTML: Output area ===== -->
-  <div id="output"></div>
+<!-- File link display -->
+<p id="fileLink"></p>
 
-  <!-- ===== JavaScript: Dropbox integration ===== -->
-  <script>
-    document.getElementById("dropbox-button").addEventListener("click", function () {
-      Dropbox.choose({
-        success: function (files) {
-          const file = files[0];
-          document.getElementById("output").innerHTML =
-            `<strong>File Name:</strong> ${file.name}<br>
-             <strong>Link:</strong> <a href="${file.link}" target="_blank">${file.link}</a>`;
-        },
-        cancel: function () {
-          alert("File selection cancelled.");
-        },
-        linkType: "preview", // or "direct"
-        multiselect: false,  // set to true if you want to allow multiple file selection
-        extensions: ['.pdf', '.docx', '.jpg', '.png'] // allowed file types
-      });
-    });
-  </script>
+<script>
+  let developerKey = 'AIzaSyAs1-yX51Kd5aKl-mB1oHhKXhOwCUDcPUY';
+  let clientId = '705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com';
+  let scope = ['https://www.googleapis.com/auth/drive.readonly'];
+
+  function onApiLoad() {
+    gapi.load('auth', { 'callback': onAuthApiLoad });
+    gapi.load('picker');
+  }
+
+  function onAuthApiLoad() {
+    window.gapi.auth.authorize(
+      {
+        'client_id': clientId,
+        'scope': scope,
+        'immediate': false
+      },
+      handleAuthResult
+    );
+  }
+
+  function handleAuthResult(authResult) {
+    if (authResult && !authResult.error) {
+      let picker = new google.picker.PickerBuilder()
+        .addView(new google.picker.DocsView().setMimeTypes("application/pdf"))
+        .setOAuthToken(authResult.access_token)
+        .setDeveloperKey(developerKey)
+        .setCallback(pickerCallback)
+        .build();
+      picker.setVisible(true);
+    }
+  }
+
+  function pickerCallback(data) {
+    if (data.action == google.picker.Action.PICKED) {
+      let file = data.docs[0];
+      document.getElementById('fileLink').innerHTML =
+        `<strong>Selected File:</strong> <a href="${file.url}" target="_blank">${file.name}</a>`;
+    }
+  }
+</script>
+
+<!-- Google Picker API Loader -->
+<script type="text/javascript" src="https://apis.google.com/js/api.js"></script>
+<script type="text/javascript" src="https://apis.google.com/js/client.js"></script>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
 
 </body>
 </html>
