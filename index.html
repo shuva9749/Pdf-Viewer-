@@ -2,68 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dropbox Chooser Example</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 50px;
-    }
-
-    h1 {
-      color: #2c3e50;
-    }
-
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
-
-    li {
-      margin: 10px 0;
-    }
-  </style>
+  <title>Dropbox Chooser Integration</title>
 </head>
 <body>
-  <h1>Dropbox File Picker</h1>
-  <button id="dropbox-picker">Choose File from Dropbox</button>
+  <h2>Choose Files from Dropbox</h2>
+  <button id="dropbox-picker">Open Dropbox Chooser</button>
 
-  <div id="file-list" style="margin-top: 20px;"></div>
+  <ul id="file-list"></ul>
 
   <!-- Dropbox Chooser SDK -->
-  <script type="text/javascript"
-    src="https://www.dropbox.com/static/api/2/dropins.js"
-    id="dropboxjs"
-    data-app-key="317alyycs84fbvu">
-  </script>
+  <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js"
+    id="dropboxjs" data-app-key="3l7z1yycs84fbvu"></script>
 
   <script>
+    // Replace dropbox link to direct download
+    function convertLinksToDirect() {
+      var links = document.querySelectorAll('a[href*="dropbox.com"]');
+      Array.prototype.forEach.call(links, function (element) {
+        element.href = element.href.replace("?dl=0", "?dl=1");
+      });
+    }
+
+    // Trigger Dropbox file chooser
     document.getElementById("dropbox-picker").addEventListener("click", function () {
       Dropbox.choose({
         linkType: "direct",
         multiselect: true,
-        extensions: [".pdf", ".mp4"],
+        extensions: ['.pdf', '.mp4'],
         success: function (files) {
-          var output = "<h2>Selected Files:</h2><ul>";
+          const fileList = document.getElementById("file-list");
+          fileList.innerHTML = "";
           files.forEach(function (file) {
-            // Convert link to direct download
-            var directLink = file.link.replace("?dl=0", "?dl=1");
-            output += "<li><strong>" + file.name + "</strong> - <a href='" + directLink + "' target='_blank'>Download</a></li>";
+            const li = document.createElement("li");
+            li.innerHTML = `<a href="${file.link}" target="_blank">${file.name}</a>`;
+            fileList.appendChild(li);
           });
-          output += "</ul>";
-          document.getElementById("file-list").innerHTML = output;
+          convertLinksToDirect(); // Make links direct
         },
         cancel: function () {
-          console.log("Dropbox chooser closed or canceled.");
+          alert("User canceled Dropbox picker.");
         }
       });
-    });
-
-    // Optional: Auto convert any existing Dropbox links to direct links
-    var at_dropbox = document.querySelectorAll('a[href*="dropbox.com"]');
-    Array.prototype.forEach.call(at_dropbox, function(element) {
-      element.href = element.href.replace("?dl=0", "?dl=1");
     });
   </script>
 </body>
