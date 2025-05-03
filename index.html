@@ -1,64 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Google Drive Picker</title>
-  <meta name="google-signin-client_id" content="705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com">
-  <script type="text/javascript" src="https://apis.google.com/js/api.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dropbox Chooser Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    h1 {
+      color: #2c3e50;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      margin: 10px 0;
+    }
+  </style>
 </head>
 <body>
+  <h1>Dropbox File Picker</h1>
+  <button id="dropbox-picker">Choose File from Dropbox</button>
 
-<!-- Google Drive Picker Button -->
-<button onclick="onApiLoad()">Pick a PDF from Google Drive</button>
+  <div id="file-list" style="margin-top: 20px;"></div>
 
-<!-- File link display -->
-<p id="fileLink"></p>
+  <!-- Dropbox Chooser SDK -->
+  <script type="text/javascript"
+    src="https://www.dropbox.com/static/api/2/dropins.js"
+    id="dropboxjs"
+    data-app-key="317alyycs84fbvu">
+  </script>
 
-<script>
-  let developerKey = 'AIzaSyAs1-yX51Kd5aKl-mB1oHhKXhOwCUDcPUY';
-  let clientId = '705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com';
-  let scope = ['https://www.googleapis.com/auth/drive.readonly'];
+  <script>
+    document.getElementById("dropbox-picker").addEventListener("click", function () {
+      Dropbox.choose({
+        linkType: "direct",
+        multiselect: true,
+        extensions: [".pdf", ".mp4"],
+        success: function (files) {
+          var output = "<h2>Selected Files:</h2><ul>";
+          files.forEach(function (file) {
+            // Convert link to direct download
+            var directLink = file.link.replace("?dl=0", "?dl=1");
+            output += "<li><strong>" + file.name + "</strong> - <a href='" + directLink + "' target='_blank'>Download</a></li>";
+          });
+          output += "</ul>";
+          document.getElementById("file-list").innerHTML = output;
+        },
+        cancel: function () {
+          console.log("Dropbox chooser closed or canceled.");
+        }
+      });
+    });
 
-  function onApiLoad() {
-    gapi.load('auth', { 'callback': onAuthApiLoad });
-    gapi.load('picker');
-  }
-
-  function onAuthApiLoad() {
-    window.gapi.auth.authorize(
-      {
-        'client_id': clientId,
-        'scope': scope,
-        'immediate': false
-      },
-      handleAuthResult
-    );
-  }
-
-  function handleAuthResult(authResult) {
-    if (authResult && !authResult.error) {
-      let picker = new google.picker.PickerBuilder()
-        .addView(new google.picker.DocsView().setMimeTypes("application/pdf"))
-        .setOAuthToken(authResult.access_token)
-        .setDeveloperKey(developerKey)
-        .setCallback(pickerCallback)
-        .build();
-      picker.setVisible(true);
-    }
-  }
-
-  function pickerCallback(data) {
-    if (data.action == google.picker.Action.PICKED) {
-      let file = data.docs[0];
-      document.getElementById('fileLink').innerHTML =
-        `<strong>Selected File:</strong> <a href="${file.url}" target="_blank">${file.name}</a>`;
-    }
-  }
-</script>
-
-<!-- Google Picker API Loader -->
-<script type="text/javascript" src="https://apis.google.com/js/api.js"></script>
-<script type="text/javascript" src="https://apis.google.com/js/client.js"></script>
-<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
-
+    // Optional: Auto convert any existing Dropbox links to direct links
+    var at_dropbox = document.querySelectorAll('a[href*="dropbox.com"]');
+    Array.prototype.forEach.call(at_dropbox, function(element) {
+      element.href = element.href.replace("?dl=0", "?dl=1");
+    });
+  </script>
 </body>
 </html>
