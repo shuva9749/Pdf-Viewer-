@@ -1,43 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Google Drive File Picker</title>
-  <meta name="google-signin-client_id" content="705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com">
+  <title>Google Drive PDF Viewer</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Google API Loader -->
+  <script src="https://apis.google.com/js/api.js"></script>
+
+  <!-- ===== CSS Styling ===== -->
   <style>
-    /* ==== CSS Section ==== */
-    #pickButton {
-      position: fixed;
-      top: 50px;
-      left: 20px;
-      padding: 10px 20px;
-      background-color: #4285F4;
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 50px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    #pick-btn {
+      background-color: #4285f4;
       color: white;
       border: none;
+      padding: 12px 24px;
+      font-size: 16px;
       border-radius: 5px;
       cursor: pointer;
     }
 
-    #fileInfo {
-      margin: 100px 20px;
-      font-family: Arial, sans-serif;
+    #pick-btn:hover {
+      background-color: #357ae8;
+    }
+
+    iframe {
+      margin-top: 30px;
+      width: 100%;
+      height: 600px;
+      border: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
-  <!-- ==== HTML Section ==== -->
-  <button id="pickButton">Pick File from Google Drive</button>
-  <div id="fileInfo"></div>
 
-  <!-- ==== JavaScript Section ==== -->
-  <script type="text/javascript">
-    const developerKey = 'AIzaSyAs1-yX51Kd5aKl-mB1oHhKXhOwCUDcPUY';
-    const clientId = '705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com';
-    const scope = ['https://www.googleapis.com/auth/drive.file'];
+  <h1>Google Drive PDF Viewer</h1>
+  <button id="pick-btn">Select PDF from Google Drive</button>
+  <div id="file-content">
+    <iframe id="viewer" src="" style="display:none;"></iframe>
+  </div>
 
+  <!-- ===== JavaScript Code ===== -->
+  <script>
+    const CLIENT_ID = "705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com";
+    const API_KEY = "AIzaSyAs1-yX51Kd5aKl-mB1oHhKXhOwCUDcPUY";
+    const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
     let pickerApiLoaded = false;
-    let oauthToken;
 
-    function onApiLoad() {
+    // Load the APIs
+    function loadApis() {
       gapi.load('auth', { 'callback': onAuthApiLoad });
       gapi.load('picker', { 'callback': onPickerApiLoad });
     }
@@ -45,8 +67,8 @@
     function onAuthApiLoad() {
       gapi.auth.authorize(
         {
-          client_id: clientId,
-          scope: scope,
+          client_id: CLIENT_ID,
+          scope: SCOPES,
           immediate: false
         },
         handleAuthResult
@@ -59,39 +81,40 @@
 
     function handleAuthResult(authResult) {
       if (authResult && !authResult.error) {
-        oauthToken = authResult.access_token;
-        createPicker();
+        const oauthToken = authResult.access_token;
+        if (pickerApiLoaded) {
+          createPicker(oauthToken);
+        }
       }
     }
 
-    function createPicker() {
-      if (pickerApiLoaded && oauthToken) {
-        const view = new google.picker.View(google.picker.ViewId.DOCS);
-        const picker = new google.picker.PickerBuilder()
-          .enableFeature(google.picker.Feature.NAV_HIDDEN)
-          .setOAuthToken(oauthToken)
-          .setDeveloperKey(developerKey)
-          .addView(view)
-          .setCallback(pickerCallback)
-          .build();
-        picker.setVisible(true);
-      }
+    function createPicker(oauthToken) {
+      const view = new google.picker.View(google.picker.ViewId.DOCS);
+      view.setMimeTypes("application/pdf");
+
+      const picker = new google.picker.PickerBuilder()
+        .enableFeature(google.picker.Feature.NAV_HIDDEN)
+        .setAppId("705204588232") // Optional, only if required
+        .setOAuthToken(oauthToken)
+        .addView(view)
+        .setDeveloperKey(API_KEY)
+        .setCallback(pickerCallback)
+        .build();
+      picker.setVisible(true);
     }
 
     function pickerCallback(data) {
       if (data.action === google.picker.Action.PICKED) {
         const file = data.docs[0];
-        document.getElementById('fileInfo').innerHTML =
-          `<strong>File Name:</strong> ${file.name}<br>
-           <strong>URL:</strong> <a href="${file.url}" target="_blank">${file.url}</a>`;
+        const url = "https://drive.google.com/file/d/" + file.id + "/preview";
+        const viewer = document.getElementById("viewer");
+        viewer.src = url;
+        viewer.style.display = "block";
       }
     }
 
-    document.getElementById('pickButton').addEventListener('click', onApiLoad);
+    document.getElementById("pick-btn").addEventListener("click", loadApis);
   </script>
 
-  <!-- Load Google APIs -->
-  <script src="https://apis.google.com/js/api.js"></script>
-  <script src="https://apis.google.com/js/client.js?onload=onApiLoad"></script>
 </body>
 </html>
