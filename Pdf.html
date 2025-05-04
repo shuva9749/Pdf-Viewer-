@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>File Picker</title>
+  <meta name="description" content="Select files from your Google Drive, OneDrive, or My Device." />
+  <meta name="keywords" content="Google Drive, OneDrive, Dropbox, File Picker, PDF Viewer" />
+  <meta name="author" content="Your Name" />
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #f0f4ff, #d2e3fc);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      color: #1a73e8;
+      font-size: 2rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .button-group button, .button-group label {
+      background-color: #1a73e8; /* Default Google Blue */
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    /* Google Drive button */
+    .button-group button.google-drive-button {
+      background-color: #1a73e8;
+    }
+
+    /* OneDrive button */
+    .button-group button.onedrive-button {
+      background-color: #0078D4; /* OneDrive Blue */
+    }
+
+    /* Dropbox button */
+    .button-group button.dropbox-button {
+      background-color: #0061FF; /* Dropbox Blue */
+    }
+
+    /* Hover effects */
+    .button-group button:hover, .button-group label:hover {
+      background-color: #0c5dc0; /* Darker Google Blue on hover */
+      transform: scale(1.03);
+    }
+
+    .button-group button.onedrive-button:hover {
+      background-color: #005A9E; /* Darker OneDrive Blue on hover */
+    }
+
+    .button-group button.dropbox-button:hover {
+      background-color: #0047CC; /* Darker Dropbox Blue on hover */
+    }
+
+    .button-group img {
+      height: 20px;
+    }
+
+    /* Make Font Awesome icons consistent height */
+    .button-group i {
+      font-size: 1.2em;
+      width: 20px;
+      text-align: center;
+    }
+
+    #content {
+      background-color: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 900px;
+      width: 100%;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+
+    #my_device_input {
+      display: none;
+    }
+
+    canvas {
+      margin-top: 1rem;
+      max-width: 100%;
+      border: 1px solid #ccc;
+    }
+
+    @media (max-width: 600px) {
+      .button-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .button-group button, .button-group label {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>File Picker</h1>
+  </header>
+
+  <div class="button-group">
+    <!-- Google Drive Button -->
+    <button class="google-drive-button" id="authorize_button" onclick="handleAuthClick()">
+      <img src="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png" alt="Google Drive Logo" />
+      Google Drive
+    </button>
+
+    <!-- OneDrive Button -->
+    <button class="onedrive-button">
+      <i class="fab fa-windows"></i> <!-- OneDrive icon -->
+      OneDrive
+    </button>
+
+    <!-- Dropbox Button -->
+    <button class="dropbox-button">
+      <img src="https://www.dropbox.com/static/images/favicon.ico" alt="Dropbox Icon" />
+      Dropbox
+    </button>
+
+    <!-- Sign Out Button -->
+    <button id="signout_button" onclick="handleSignoutClick()">
+      <i class="fas fa-sign-out-alt"></i>
+      Sign Out
+    </button>
+
+    <!-- My Device File Picker -->
+    <label for="my_device_input">
+      <i class="fas fa-folder-open"></i>
+      My Device
+    </label>
+    <input type="file" id="my_device_input" accept="application/pdf" multiple onchange="handleLocalFiles(event)" />
+  </div>
+
+  <div id="content"></div>
+
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- JavaScript Functions for Google Drive, OneDrive, Dropbox and Local Files (Adjust as per your needs) -->
+  <script>
+    // Add your JavaScript for Google Drive, OneDrive, Dropbox, and My Device here
+  </script>
+
+</body>
+</html>
