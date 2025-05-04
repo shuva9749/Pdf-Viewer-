@@ -2,48 +2,76 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Dropbox Chooser Integration</title>
-</head>
-<body>
-  <h2>Choose Files from Dropbox</h2>
-  <button id="dropbox-picker">Open Dropbox Chooser</button>
+  <title>Home | PDF Tools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-  <ul id="file-list"></ul>
-
-  <!-- Dropbox Chooser SDK -->
-  <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js"
-    id="dropboxjs" data-app-key="3l7z1yycs84fbvu"></script>
-
-  <script>
-    // Replace dropbox link to direct download
-    function convertLinksToDirect() {
-      var links = document.querySelectorAll('a[href*="dropbox.com"]');
-      Array.prototype.forEach.call(links, function (element) {
-        element.href = element.href.replace("?dl=0", "?dl=1");
-      });
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    // Trigger Dropbox file chooser
-    document.getElementById("dropbox-picker").addEventListener("click", function () {
-      Dropbox.choose({
-        linkType: "direct",
-        multiselect: true,
-        extensions: ['.pdf', '.mp4'],
-        success: function (files) {
-          const fileList = document.getElementById("file-list");
-          fileList.innerHTML = "";
-          files.forEach(function (file) {
-            const li = document.createElement("li");
-            li.innerHTML = `<a href="${file.link}" target="_blank">${file.name}</a>`;
-            fileList.appendChild(li);
-          });
-          convertLinksToDirect(); // Make links direct
-        },
-        cancel: function () {
-          alert("User canceled Dropbox picker.");
-        }
-      });
-    });
-  </script>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to right, #e0ecff, #f8fbff);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    .title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      color: #1a237e;
+    }
+
+    .card {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-block;
+      text-align: center;
+      width: 300px;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .card i {
+      font-size: 3rem;
+      color: #1a73e8;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">Welcome to PDF Tools</div>
+
+    <div class="card" onclick="location.href='pdf-opener.html'">
+      <i class="fas fa-file-pdf"></i>
+      <div class="card-title">PDF Opener</div>
+    </div>
+  </div>
 </body>
 </html>
