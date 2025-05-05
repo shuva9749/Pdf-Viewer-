@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Google Drive File Picker</title>
+  <title>Google Drive and Dropbox File Picker</title>
 
   <!-- =================================== -->
   <!-- HTML PART: Meta, Fonts, Icons      -->
   <!-- =================================== -->
-  <meta name="description" content="Select files from your Google Drive using the official file picker." />
-  <meta name="keywords" content="Google Drive, OneDrive, File Picker, PDF Viewer" />
+  <meta name="description" content="Select files from Google Drive or Dropbox using official file pickers." />
+  <meta name="keywords" content="Google Drive, Dropbox, File Picker, PDF Viewer" />
   <meta name="author" content="Your Name" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -70,6 +70,10 @@
        background-color: #0078D4;
     }
 
+    .button-group button.dropbox-button {
+      background-color: #0061FF;
+    }
+
     .button-group button:hover,
     .button-group label:hover {
       background-color: #0c5dc0;
@@ -78,6 +82,10 @@
 
     .button-group button.onedrive-button:hover {
         background-color: #005A9E;
+    }
+
+    .button-group button.dropbox-button:hover {
+      background-color: #004dc9;
     }
 
     .button-group img {
@@ -122,20 +130,45 @@
         justify-content: center;
       }
     }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    ul li {
+      margin: 5px 0;
+    }
+
+    ul li a {
+      text-decoration: none;
+      color: #333;
+    }
+
+    ul li a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
+
   <!-- =============================== -->
   <!-- HTML PART: Page Content         -->
   <!-- =============================== -->
   <header>
-    <h1>Google Drive File Picker</h1>
+    <h1>Google Drive & Dropbox File Picker</h1>
   </header>
 
   <div class="button-group">
     <button id="authorize_button" onclick="handleAuthClick()">
       <img src="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png" alt="Google Drive Logo" />
       Google Drive
+    </button>
+
+    <button class="dropbox-button" id="dropbox-picker">
+      <i class="fab fa-dropbox"></i>
+      Dropbox
     </button>
 
     <button class="onedrive-button">
@@ -156,13 +189,14 @@
   </div>
 
   <div id="content"></div>
+  <ul id="file-list"></ul>
 
   <!-- ============================== -->
   <!-- JavaScript PART: PDF.js + APIs -->
   <!-- ============================== -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
-    // Constants
+    // Google Drive untouched code
     const CLIENT_ID = '705204588232-3m2bivi6c0nd41lgpe7j34abim8s0gta.apps.googleusercontent.com';
     const API_KEY = 'AIzaSyAs1-yX51Kd5aKl-mB1oHhKXhOwCUDcPUY';
     const APP_ID = '705204588232';
@@ -312,10 +346,34 @@
         reader.readAsArrayBuffer(file);
       }
     }
+
+    // Dropbox Chooser
+    document.getElementById("dropbox-picker").addEventListener("click", function () {
+      Dropbox.choose({
+        linkType: "direct",
+        multiselect: true,
+        extensions: ['.pdf', '.mp4'],
+        folderselect: false,
+        success: function (files) {
+          const fileList = document.getElementById("file-list");
+          fileList.innerHTML = "";
+          files.forEach(function (file) {
+            const link = file.link.replace("?dl=0", "?dl=1");
+            const li = document.createElement("li");
+            li.innerHTML = `<a href="${link}" target="_blank">${file.name}</a>`;
+            fileList.appendChild(li);
+          });
+        },
+        cancel: function () {
+          console.log("Dropbox picker canceled");
+        }
+      });
+    });
   </script>
 
-  <!-- Google Scripts -->
+  <!-- Google + Dropbox SDKs -->
   <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
   <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+  <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="3l7z1yycs84fbvu"></script>
 </body>
 </html>
