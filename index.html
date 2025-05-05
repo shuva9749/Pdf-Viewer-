@@ -141,15 +141,18 @@
 
         for (const doc of data.docs) {
           const fileId = doc.id;
-          const res = await gapi.client.drive.files.get({
-            fileId: fileId,
-            fields: 'webViewLink, webContentLink, name',
+          const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            }
           });
 
-          const downloadLink = res.result.webContentLink;
-          const viewer = document.createElement('iframe');
-          viewer.src = downloadLink;
-          contentDiv.appendChild(viewer);
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+
+          const iframe = document.createElement('iframe');
+          iframe.src = url;
+          contentDiv.appendChild(iframe);
         }
       }
     }
